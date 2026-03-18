@@ -45,11 +45,16 @@ def graficar_todo(df):
 
     status_by_bucket = tmp.groupby(["bucket_30m", "status_family"]).size().unstack(fill_value=0)
     plt.figure(figsize=(11, 4))
-    status_by_bucket.plot(kind="bar", stacked=True, ax=plt.gca(), width=0.9)
+    ax = status_by_bucket.plot(kind="bar", stacked=True, ax=plt.gca(), width=0.9)
     plt.title("Códigos de estado por franja")
     plt.xlabel("Franja horaria")
     plt.ylabel("Cantidad")
-    plt.xticks([])
+    # bucket_30m tiene franjas de 30 minutos: 2 barras = 1 hora, 4 barras = 2 horas.
+    step = 2 if len(status_by_bucket) <= 48 else 4
+    tick_positions = list(range(0, len(status_by_bucket), step))
+    tick_labels = [status_by_bucket.index[i].strftime("%H:%M") for i in tick_positions]
+    ax.set_xticks(tick_positions)
+    ax.set_xticklabels(tick_labels, rotation=45, ha="right")
     plt.tight_layout()
     plt.show()
 
