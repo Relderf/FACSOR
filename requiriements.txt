@@ -1,0 +1,5 @@
+numpy
+psutil
+pandas
+polars
+numba
