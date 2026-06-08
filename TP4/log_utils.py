@@ -16,9 +16,10 @@ def mostrar_resumen(df):
 
 def graficar_todo(df):
     tmp = df.copy()
-    tmp["bucket_30m"] = tmp["timestamp"].dt.floor("30min")
+    tmp["bucket_30m"] = pd.to_datetime(tmp["timestamp"], errors="coerce").dt.floor("30min")
 
     plt.figure(figsize=(11, 4))
+    tmp["response_ms"] = pd.to_numeric(tmp["response_ms"], errors="coerce")
     tmp.groupby("bucket_30m").size().plot()
     plt.title("Eventos por franja de 30 minutos")
     plt.xlabel("Franja horaria")
@@ -44,6 +45,7 @@ def graficar_todo(df):
     plt.show()
 
     status_by_bucket = tmp.groupby(["bucket_30m", "status_family"]).size().unstack(fill_value=0)
+    status_by_bucket.index = status_by_bucket.index.astype(str)
     plt.figure(figsize=(11, 4))
     ax = status_by_bucket.plot(kind="bar", stacked=True, ax=plt.gca(), width=0.9)
     plt.title("Códigos de estado por franja")
@@ -52,7 +54,7 @@ def graficar_todo(df):
     # bucket_30m tiene franjas de 30 minutos: 2 barras = 1 hora, 4 barras = 2 horas.
     step = 2 if len(status_by_bucket) <= 48 else 4
     tick_positions = list(range(0, len(status_by_bucket), step))
-    tick_labels = [status_by_bucket.index[i].strftime("%H:%M") for i in tick_positions]
+    tick_labels = [status_by_bucket.index[i][11:16] for i in tick_positions]
     ax.set_xticks(tick_positions)
     ax.set_xticklabels(tick_labels, rotation=45, ha="right")
     plt.tight_layout()
