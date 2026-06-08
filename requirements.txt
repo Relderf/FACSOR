@@ -3,3 +3,4 @@ psutil
 pandas
 polars
 numba
+matplotlib
